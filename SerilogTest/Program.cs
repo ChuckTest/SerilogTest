@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -8,24 +10,28 @@ namespace SerilogTest
 {
     internal class Program
     {
+        private static IConfiguration Configuration { get; } = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", true, true)
+            .AddEnvironmentVariables()
+            .Build();
+
         static void Main(string[] args)
         {
             try
             {
                 Guid guid = Guid.NewGuid();
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Configuration.GetConnectionString("elasticsearch"))) // for the docker-compose implementation
+                    {
+                        FailureCallback = FailureCallback,
+                        EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
+                                           EmitEventFailureHandling.WriteToFailureSink |
+                                           EmitEventFailureHandling.RaiseCallback
+                    })
+                    .CreateLogger();
 
-                var loggerConfiguration = new LoggerConfiguration();
-                loggerConfiguration.ReadFrom.AppSettings();
-                Log.Logger = loggerConfiguration.CreateLogger();
-
-                var loggerConfiguration2 = new LoggerConfiguration();
-                var loggerConfiguration3 = loggerConfiguration2.WriteTo.Logger(Log.Logger);
-                var loggerConfiguration4 = loggerConfiguration3.WriteTo.Elasticsearch(new ElasticsearchSinkOptions()
-                {
-                    FailureCallback = FailureCallback,
-                    EmitEventFailure = EmitEventFailureHandling.RaiseCallback
-                });
-                Log.Logger = loggerConfiguration4.CreateLogger();
                 //for (int i = 0; i < 1000; i++)
                 //{
                 //    Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
