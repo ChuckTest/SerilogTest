@@ -41,7 +41,7 @@ namespace SerilogTest
 
         static void FailureCallback(LogEvent e)
         {
-            Console.WriteLine("Unable to submit event " + e.MessageTemplate);
+            Console.WriteLine($"Unable to submit event {e.MessageTemplate},{Environment.NewLine}{e.Exception}");
             if (e.Exception != null)
             {
                 var content = $"{e.Exception}";
