@@ -22,14 +22,7 @@ namespace SerilogTest
             {
                 Guid guid = Guid.NewGuid();
                 Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Configuration.GetConnectionString("elasticsearch"))) // for the docker-compose implementation
-                    {
-                        FailureCallback = FailureCallback,
-                        EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
-                                           EmitEventFailureHandling.WriteToFailureSink |
-                                           EmitEventFailureHandling.RaiseCallback
-                    })
+                    .ReadFrom.Configuration(Configuration)
                     .CreateLogger();
 
                 //for (int i = 0; i < 1000; i++)
