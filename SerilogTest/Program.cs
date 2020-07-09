@@ -1,10 +1,11 @@
 ﻿using System;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 
 namespace SerilogTest
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
@@ -20,7 +21,7 @@ namespace SerilogTest
                     .WriteTo.Logger(Log.Logger)
                     .WriteTo.Elasticsearch(new ElasticsearchSinkOptions()
                     {
-                        FailureCallback =e => Console.WriteLine("Unable to submit event " + e.MessageTemplate),
+                        FailureCallback = FailureCallback,
                         EmitEventFailure = EmitEventFailureHandling.RaiseCallback
                     });
                 Log.Logger = loggerConfiguration2.CreateLogger();
@@ -35,6 +36,11 @@ namespace SerilogTest
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        static void FailureCallback(LogEvent e)
+        {
+            Console.WriteLine("Unable to submit event " + e.MessageTemplate);
         }
     }
 }
