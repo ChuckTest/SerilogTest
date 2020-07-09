@@ -9,8 +9,7 @@ namespace SerilogTest
         {
             try
             {
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
+                Log.Logger = new LoggerConfiguration().ReadFrom.AppSettings()
                     .CreateLogger();
 
                 Log.Information("Hello, world!");
