@@ -18,14 +18,14 @@ namespace SerilogTest
                 loggerConfiguration.ReadFrom.AppSettings();
                 Log.Logger = loggerConfiguration.CreateLogger();
 
-                var loggerConfiguration2 = new LoggerConfiguration()
-                    .WriteTo.Logger(Log.Logger)
-                    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions()
-                    {
-                        FailureCallback = FailureCallback,
-                        EmitEventFailure = EmitEventFailureHandling.RaiseCallback
-                    });
-                Log.Logger = loggerConfiguration2.CreateLogger();
+                var loggerConfiguration2 = new LoggerConfiguration();
+                var loggerConfiguration3 = loggerConfiguration2.WriteTo.Logger(Log.Logger);
+                var loggerConfiguration4 = loggerConfiguration3.WriteTo.Elasticsearch(new ElasticsearchSinkOptions()
+                {
+                    FailureCallback = FailureCallback,
+                    EmitEventFailure = EmitEventFailureHandling.RaiseCallback
+                });
+                Log.Logger = loggerConfiguration4.CreateLogger();
                 //for (int i = 0; i < 1000; i++)
                 //{
                 //    Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
