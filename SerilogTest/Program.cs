@@ -20,7 +20,8 @@ namespace SerilogTest
                     .WriteTo.Logger(Log.Logger)
                     .WriteTo.Elasticsearch(new ElasticsearchSinkOptions()
                     {
-                        FailureCallback =e => Console.WriteLine("Unable to submit event " + e.MessageTemplate)
+                        FailureCallback =e => Console.WriteLine("Unable to submit event " + e.MessageTemplate),
+                        EmitEventFailure = EmitEventFailureHandling.RaiseCallback
                     });
                 Log.Logger = loggerConfiguration2.CreateLogger();
                 for (int i = 0; i < 1000; i++)
