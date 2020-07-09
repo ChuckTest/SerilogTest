@@ -14,17 +14,9 @@ namespace SerilogTest
                 Log.Logger = new LoggerConfiguration().ReadFrom.AppSettings()
                     .CreateLogger();
 
-                Log.Information($"{guid}, Hello, world!");
-
-                int a = 10, b = 0;
-                try
+                for (int i = 0; i < 1000; i++)
                 {
-                    Log.Debug($"{guid}, Dividing {a} by {b}");
-                    Console.WriteLine(a / b);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"{guid}, Something went wrong");
+                    Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 }
 
                 Log.CloseAndFlush();
