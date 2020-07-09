@@ -9,20 +9,22 @@ namespace SerilogTest
         {
             try
             {
+                Guid guid = Guid.NewGuid();
+
                 Log.Logger = new LoggerConfiguration().ReadFrom.AppSettings()
                     .CreateLogger();
 
-                Log.Information("Hello, world!");
+                Log.Information($"{guid}, Hello, world!");
 
                 int a = 10, b = 0;
                 try
                 {
-                    Log.Debug("Dividing {A} by {B}", a, b);
+                    Log.Debug($"{guid}, Dividing {a} by {b}");
                     Console.WriteLine(a / b);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Something went wrong");
+                    Log.Error(ex, $"{guid}, Something went wrong");
                 }
 
                 Log.CloseAndFlush();
