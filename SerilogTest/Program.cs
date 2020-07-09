@@ -26,11 +26,11 @@ namespace SerilogTest
                         EmitEventFailure = EmitEventFailureHandling.RaiseCallback
                     });
                 Log.Logger = loggerConfiguration2.CreateLogger();
-                for (int i = 0; i < 1000; i++)
-                {
-                    Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
-                }
-
+                //for (int i = 0; i < 1000; i++)
+                //{
+                //    Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
+                //}
+                Log.Information($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 Log.CloseAndFlush();
             }
             catch (Exception ex)
