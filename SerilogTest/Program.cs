@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using Serilog;
+using Serilog.Debugging;
 
 namespace SerilogTest
 {
@@ -18,10 +19,14 @@ namespace SerilogTest
 
         static void Main(string[] args)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine(assembly.FullName);
             try
             {
+                var assembly = Assembly.GetExecutingAssembly();
+                Console.WriteLine(assembly.FullName);
+
+                SelfLog.Enable(SelfLogHandler);
+
+
                 var path = GetConfigPath();
                 Guid guid = Guid.NewGuid();
 
@@ -41,6 +46,11 @@ namespace SerilogTest
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        static void SelfLogHandler(string log)
+        {
+            Console.WriteLine($"SelfLogHandler, {log}");
         }
     }
 }
