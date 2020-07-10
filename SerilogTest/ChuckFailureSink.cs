@@ -9,6 +9,7 @@ namespace SerilogTest
     {
         void ILogEventSink.Emit(LogEvent logEvent)
         {
+            throw new NotSupportedException();
             var e = logEvent;
             Console.WriteLine($"Unable to submit event {e.MessageTemplate},{Environment.NewLine}{e.Exception}");
             if (e.Exception != null)
