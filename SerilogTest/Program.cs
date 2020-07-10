@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.Elasticsearch;
 
 namespace SerilogTest
 {
@@ -43,17 +40,6 @@ namespace SerilogTest
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }
-        }
-
-        static void FailureCallback(LogEvent e)
-        {
-            Console.WriteLine($"Unable to submit event {e.MessageTemplate},{Environment.NewLine}{e.Exception}");
-            if (e.Exception != null)
-            {
-                var content = $"{e.Exception}";
-                SerilogEventLog lisaEventLog = new SerilogEventLog();
-                lisaEventLog.WriteEntry(content, EventLogEntryType.Error);
             }
         }
     }
