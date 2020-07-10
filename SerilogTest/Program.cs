@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using Serilog;
 using Serilog.Debugging;
 
@@ -21,9 +21,6 @@ namespace SerilogTest
         {
             try
             {
-                var assembly = Assembly.GetExecutingAssembly();
-                Console.WriteLine(assembly.FullName);
-
                 SelfLog.Enable(SelfLogHandler);
 
 
@@ -48,9 +45,11 @@ namespace SerilogTest
             }
         }
 
+
+        static readonly SerilogEventLog lisaEventLog = new SerilogEventLog();
         static void SelfLogHandler(string log)
         {
-            Console.WriteLine($"SelfLogHandler, {log}");
+            lisaEventLog.WriteEntry(log, EventLogEntryType.Error);
         }
     }
 }
