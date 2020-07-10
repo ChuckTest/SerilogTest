@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -8,24 +9,26 @@ namespace SerilogTest
 {
     internal class Program
     {
+        static string GetConfigPath()
+        {
+            const string testsConfig = "serilog.config";
+            if (File.Exists(testsConfig))
+                return Path.GetFullPath(testsConfig);
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            return Path.GetFullPath(Path.Combine(basePath, testsConfig));
+        }
+
         static void Main(string[] args)
         {
             try
             {
+                var path = GetConfigPath();
                 Guid guid = Guid.NewGuid();
 
                 var loggerConfiguration = new LoggerConfiguration();
-                loggerConfiguration.ReadFrom.AppSettings();
-                Log.Logger = loggerConfiguration.CreateLogger();
-
-                var loggerConfiguration2 = new LoggerConfiguration();
-                var loggerConfiguration3 = loggerConfiguration2.WriteTo.Logger(Log.Logger);
-                var loggerConfiguration4 = loggerConfiguration3.WriteTo.Elasticsearch(new ElasticsearchSinkOptions()
-                {
-                    FailureCallback = FailureCallback,
-                    EmitEventFailure = EmitEventFailureHandling.RaiseCallback
-                });
-                Log.Logger = loggerConfiguration4.CreateLogger();
+                loggerConfiguration = loggerConfiguration.ReadFrom.AppSettings(filePath: path);
+                var logger = loggerConfiguration.CreateLogger();
+                Log.Logger = logger;
                 //for (int i = 0; i < 1000; i++)
                 //{
                 //    Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
