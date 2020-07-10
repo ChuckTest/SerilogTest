@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -20,6 +21,8 @@ namespace SerilogTest
 
         static void Main(string[] args)
         {
+            var assembly = Assembly.GetExecutingAssembly();
+            Console.WriteLine(assembly.FullName);
             try
             {
                 var path = GetConfigPath();
