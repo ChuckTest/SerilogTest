@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Serilog;
 using Serilog.Debugging;
 
@@ -30,9 +31,10 @@ namespace SerilogTest2
                 loggerConfiguration = loggerConfiguration.ReadFrom.AppSettings(filePath: path);
                 var logger = loggerConfiguration.CreateLogger();
                 Log.Logger = logger;
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 30; i++)
                 {
                     Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
+                    Thread.Sleep(500);
                 }
                 Log.Information($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 Log.Error($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
