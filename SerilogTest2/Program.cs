@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Serilog;
 using Serilog.Debugging;
@@ -17,11 +20,31 @@ namespace SerilogTest2
             var basePath = AppDomain.CurrentDomain.BaseDirectory;
             return Path.GetFullPath(Path.Combine(basePath, testsConfig));
         }
+        internal static IEnumerable<KeyValuePair<string, Assembly>> GetAutoLoadingFileLocations()
+        {
+            var nlogAssembly = typeof(ILogger).GetAssembly();
+            var assemblyLocation = PathHelpers.TrimDirectorySeparators(AssemblyHelpers.GetAssemblyFileLocation(nlogAssembly));
+            if (!string.IsNullOrEmpty(assemblyLocation))
+                yield return new KeyValuePair<string, Assembly>(assemblyLocation, nlogAssembly);
+
+            var entryAssembly = Assembly.GetEntryAssembly();
+            var entryLocation = PathHelpers.TrimDirectorySeparators(AssemblyHelpers.GetAssemblyFileLocation(Assembly.GetEntryAssembly()));
+            if (!string.IsNullOrEmpty(entryLocation) && !string.Equals(entryLocation, assemblyLocation, StringComparison.OrdinalIgnoreCase))
+                yield return new KeyValuePair<string, Assembly>(entryLocation, entryAssembly);
+
+            // TODO Consider to prioritize AppDomain.PrivateBinPath
+            var baseDirectory = PathHelpers.TrimDirectorySeparators(AppDomain.CurrentDomain.BaseDirectory);
+            //InternalLogger.Debug("Auto loading based on AppDomain-BaseDirectory found location: {0}", baseDirectory);
+            if (!string.IsNullOrEmpty(baseDirectory) && !string.Equals(baseDirectory, assemblyLocation, StringComparison.OrdinalIgnoreCase))
+                yield return new KeyValuePair<string, Assembly>(baseDirectory, null);
+        }
 
         static void Main(string[] args)
         {
             try
             {
+                AutoLoad();
+
                 SelfLog.Enable(SelfLogHandler);
 
                 var path = GetConfigPath();
@@ -46,10 +69,89 @@ namespace SerilogTest2
             }
         }
 
-        static readonly SerilogEventLog lisaEventLog = new SerilogEventLog();
+        static void AutoLoad()
+        {
+            var nlogAssembly = typeof(ILogger).GetAssembly();
+            var assemblyLocation = string.Empty;
+            var extensionDlls = ArrayHelper.Empty<string>();
+            var fileLocations = GetAutoLoadingFileLocations();
+            foreach (var fileLocation in fileLocations)
+            {
+                if (string.IsNullOrEmpty(fileLocation.Key))
+                    continue;
+
+                if (string.IsNullOrEmpty(assemblyLocation))
+                    assemblyLocation = fileLocation.Key;
+
+                extensionDlls = GetNLogExtensionFiles(fileLocation.Key);
+                if (extensionDlls.Length > 0)
+                {
+                    assemblyLocation = fileLocation.Key;
+                    break;
+                }
+            }
+            Console.WriteLine($"{nameof(nlogAssembly)} = {nlogAssembly}");
+            Console.WriteLine($"{nameof(extensionDlls)}:");
+            int i = 0;
+            foreach (var item in extensionDlls)
+            {
+                i++;
+                Console.WriteLine($"{i}, {item}");
+            }
+            Console.WriteLine("Start auto loading, location: {0}", assemblyLocation);
+            Console.WriteLine("LoadNLogExtensionAssemblies(factory, nlogAssembly, extensionDlls);");
+        }
+
+        private static string[] GetNLogExtensionFiles(string assemblyLocation)
+        {
+            try
+            {
+                //InternalLogger.Debug("Search for auto loading files in location: {0}", assemblyLocation);
+                if (string.IsNullOrEmpty(assemblyLocation))
+                {
+                    return ArrayHelper.Empty<string>();
+                }
+
+                var extensionDlls = Directory.GetFiles(assemblyLocation, "NLog*.dll")
+                .Select(Path.GetFileName)
+                .Where(x => !x.Equals("NLog.dll", StringComparison.OrdinalIgnoreCase))
+                .Where(x => !x.Equals("NLog.UnitTests.dll", StringComparison.OrdinalIgnoreCase))
+                .Select(x => Path.Combine(assemblyLocation, x));
+                return extensionDlls.ToArray();
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                //InternalLogger.Warn(ex, "Skipping auto loading location because assembly directory does not exist: {0}", assemblyLocation);
+                //if (ex.MustBeRethrown())
+                {
+                    throw;
+                }
+                return ArrayHelper.Empty<string>();
+            }
+            catch (System.Security.SecurityException ex)
+            {
+                //InternalLogger.Warn(ex, "Skipping auto loading location because access not allowed to assembly directory: {0}", assemblyLocation);
+                //if (ex.MustBeRethrown())
+                {
+                    throw;
+                }
+                return ArrayHelper.Empty<string>();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                //InternalLogger.Warn(ex, "Skipping auto loading location because access not allowed to assembly directory: {0}", assemblyLocation);
+                //if (ex.MustBeRethrown())
+                {
+                    throw;
+                }
+                return ArrayHelper.Empty<string>();
+            }
+        }
+
+        static readonly SerilogEventLog serilogEventLog = new SerilogEventLog();
         static void SelfLogHandler(string log)
         {
-            lisaEventLog.WriteEntry(log, EventLogEntryType.Error);
+            serilogEventLog.WriteEntry(log, EventLogEntryType.Error);
         }
     }
 }

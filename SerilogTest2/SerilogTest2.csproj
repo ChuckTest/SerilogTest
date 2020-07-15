@@ -53,8 +53,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayHelper.cs" />
+    <Compile Include="AssemblyHelpers.cs" />
+    <Compile Include="PathHelpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="SerilogEventLog.cs" />
   </ItemGroup>
   <ItemGroup>
