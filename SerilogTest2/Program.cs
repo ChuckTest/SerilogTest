@@ -37,7 +37,7 @@ namespace SerilogTest2
             }
             if (!configFile.Exists)
             {
-                serilogEventLog.WriteEntry($@"{baseDirectory}{Environment.NewLine}Can not find the configuration in following path {stringBuilder}", EventLogEntryType.Warning);
+                serilogEventLog.WriteEntry($"Can not find the configuration in following path {stringBuilder}", EventLogEntryType.Warning);
                 return string.Empty;
             }
             else
@@ -53,12 +53,19 @@ namespace SerilogTest2
                 SelfLog.Enable(SelfLogHandler);
 
                 var path = GetConfigPath();
-                Guid guid = Guid.NewGuid();
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    var loggerConfiguration = new LoggerConfiguration();
+                    loggerConfiguration = loggerConfiguration.ReadFrom.AppSettings(filePath: path);
+                    var logger = loggerConfiguration.CreateLogger();
+                    Log.Logger = logger;
 
-                var loggerConfiguration = new LoggerConfiguration();
-                loggerConfiguration = loggerConfiguration.ReadFrom.AppSettings(filePath: path);
-                var logger = loggerConfiguration.CreateLogger();
-                Log.Logger = logger;
+                }
+                else
+                {    //Default configuration
+                    throw new Exception($"Can not find the configuration file for Serilog");
+                }
+                Guid guid = Guid.NewGuid();
                 for (int i = 0; i < 30; i++)
                 {
                     Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
