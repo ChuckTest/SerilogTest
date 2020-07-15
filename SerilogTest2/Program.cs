@@ -112,10 +112,11 @@ namespace SerilogTest2
                     return ArrayHelper.Empty<string>();
                 }
 
-                var extensionDlls = Directory.GetFiles(assemblyLocation, "NLog*.dll")
+                const string libraryName = "Serilog";
+                var extensionDlls = Directory.GetFiles(assemblyLocation, $"{libraryName}*.dll")
                 .Select(Path.GetFileName)
-                .Where(x => !x.Equals("NLog.dll", StringComparison.OrdinalIgnoreCase))
-                .Where(x => !x.Equals("NLog.UnitTests.dll", StringComparison.OrdinalIgnoreCase))
+                .Where(x => !x.Equals($"{libraryName}.dll", StringComparison.OrdinalIgnoreCase))
+                .Where(x => !x.Equals($"{libraryName}.UnitTests.dll", StringComparison.OrdinalIgnoreCase))
                 .Select(x => Path.Combine(assemblyLocation, x));
                 return extensionDlls.ToArray();
             }
