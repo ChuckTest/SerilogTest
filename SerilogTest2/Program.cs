@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Debugging;
+using ConfigurationBuilder = Microsoft.Extensions.Configuration.ConfigurationBuilder;
 
 namespace SerilogTest2
 {
@@ -52,25 +54,22 @@ namespace SerilogTest2
             {
                 SelfLog.Enable(SelfLogHandler);
 
-                var path = GetConfigPath();
-                if (!string.IsNullOrWhiteSpace(path))
-                {
-                    var loggerConfiguration = new LoggerConfiguration();
-                    loggerConfiguration = loggerConfiguration.ReadFrom.AppSettings(filePath: path);
-                    var logger = loggerConfiguration.CreateLogger();
-                    Log.Logger = logger;
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
 
-                }
-                else
-                {    //Default configuration
-                    throw new Exception($"Can not find the configuration file for Serilog");
-                }
+                var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+                var logger = loggerConfiguration.CreateLogger();
+                Log.Logger = logger;
+
                 Guid guid = Guid.NewGuid();
                 for (int i = 0; i < 30; i++)
                 {
                     Log.Information($"{guid}, {i}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                     Thread.Sleep(500);
                 }
+
                 Log.Information($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 Log.Error($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 Log.CloseAndFlush();
