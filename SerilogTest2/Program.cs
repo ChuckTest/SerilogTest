@@ -53,7 +53,7 @@ namespace SerilogTest2
             try
             {
                 SelfLog.Enable(SelfLogHandler);
-
+                Environment.SetEnvironmentVariable("BASEDIR", AppDomain.CurrentDomain.BaseDirectory);
                 var configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json")
@@ -72,6 +72,7 @@ namespace SerilogTest2
 
                 Log.Information($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 Log.Error($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
+                Log.Debug($"{guid}, this is a test log {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz}.");
                 Log.CloseAndFlush();
             }
             catch (Exception ex)
